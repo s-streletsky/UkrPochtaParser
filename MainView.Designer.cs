@@ -1,5 +1,5 @@
 ﻿
-namespace UkrPochtaParser
+namespace UkrPochtaInternationShippingCalc
 {
     partial class MainView
     {
@@ -47,6 +47,7 @@ namespace UkrPochtaParser
             this.shippingCostOutput = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.countriesBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.parcelProperties.SuspendLayout();
             this.shippingMethod.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.countriesBindingSource)).BeginInit();
@@ -61,7 +62,6 @@ namespace UkrPochtaParser
             this.countriesList.Name = "countriesList";
             this.countriesList.Size = new System.Drawing.Size(350, 403);
             this.countriesList.TabIndex = 0;
-            //this.countriesList.SelectedIndexChanged += new System.EventHandler(this.CountriesListIndexChange);
             // 
             // countryDetails
             // 
@@ -81,7 +81,6 @@ namespace UkrPochtaParser
             this.calculateShippingButton.TabIndex = 2;
             this.calculateShippingButton.Text = "Рассчитать";
             this.calculateShippingButton.UseVisualStyleBackColor = true;
-            //this.calculateShippingButton.Click += new System.EventHandler(this.CalculateShippingButtonClick);
             // 
             // label1
             // 
@@ -155,7 +154,6 @@ namespace UkrPochtaParser
             this.getCountriesButton.TabIndex = 9;
             this.getCountriesButton.Text = "Получить список стран";
             this.getCountriesButton.UseVisualStyleBackColor = true;
-            //this.getCountriesButton.Click += new System.EventHandler(this.GetCountriesButtonClick);
             // 
             // byAir
             // 
@@ -221,15 +219,19 @@ namespace UkrPochtaParser
             this.label4.TabIndex = 14;
             this.label4.Text = "Стоимость, $:";
             // 
-            // countriesBindingSource
+            // progressBar1
             // 
-            this.countriesBindingSource.DataSource = typeof(UkrPochtaParser.Countries);
+            this.progressBar1.Location = new System.Drawing.Point(957, 451);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(100, 23);
+            this.progressBar1.TabIndex = 15;
             // 
             // MainView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1064, 489);
+            this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.shippingCostOutput);
             this.Controls.Add(this.shippingMethod);
@@ -242,6 +244,8 @@ namespace UkrPochtaParser
             this.Controls.Add(this.calculateShippingButton);
             this.Controls.Add(this.countryDetails);
             this.Controls.Add(this.countriesList);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MinimumSize = new System.Drawing.Size(1082, 530);
             this.Name = "MainView";
             this.Text = "Form1";
             this.parcelProperties.ResumeLayout(false);
@@ -272,6 +276,7 @@ namespace UkrPochtaParser
         private System.Windows.Forms.RadioButton combined;
         private System.Windows.Forms.TextBox shippingCostOutput;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ProgressBar progressBar1;
     }
 }
 

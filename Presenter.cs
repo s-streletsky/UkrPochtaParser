@@ -6,67 +6,58 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace UkrPochtaParser
+namespace UkrPochtaInternationShippingCalc
 {
     class Presenter
     {
         public IMainView mainView;
-        private Source source;
-        private Countries countries;
+        private UkrPoshtaParser ukrPoshtaParser;
+        private ShippingRates shippingRates;
+        private Repository repo;
         public Presenter(IMainView i)
         {
             this.mainView = i;
-            this.source = new Source("https://www.ukrposhta.ua/ru/taryfy-mizhnarodni-vidpravlennia-posylky");
-            this.countries = new Countries();
+            this.shippingRates = new ShippingRates();
+            this.repo = new Repository();
             mainView.GetCountriesButtonClick += OnGetCountriesButtonClick;
             mainView.CalculateShippingButtonClick += OnCalculateShippingButtonClick;
             mainView.CountriesListIndexChanged += OnCountriesListIndexChange;
         }
 
-        //private void OnGetCountriesButtonClick(object sender, EventArgs e)
-        //{
-        //    countries.ParseSourceStringToList(source.GetInnerText());
-
-        //    var dirPath = "D://Prog//UkrPochtaParser/";
-        //    var file = new FileInfo(dirPath + "ShippingRates.xml");
-
-        //    XmlSerializer serializer = new XmlSerializer(typeof(List<Country>));
-
-        //    serializer.Serialize(new FileStream(dirPath + "ShippingRates.xml", FileMode.OpenOrCreate), countries.List);
-
-        //    mainView.SetCountriesList(countries.CountriesListContent);
-
-        //    mainView.IsGetCountriesButtonEnabled = false;
-        //}
-
         private void OnGetCountriesButtonClick(object sender, EventArgs e)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(List<Country>));
-            var path = "D://Prog//UkrPochtaParser//ShippingRates.xml";
+            var filePath = Path.Combine(AppContext.BaseDirectory, "ShippingRates.xml");
 
-            if (File.Exists(path))
+            if (File.Exists(filePath))
             {
-                countries.List.AddRange((List<Country>)serializer.Deserialize(new FileStream(path, FileMode.Open)));
+                var deserializedList = repo.Load(filePath);
+                shippingRates.List.AddRange(deserializedList);              
             }
             else
             {
-                countries.ParseSourceStringToList(source.GetInnerText());
-                serializer.Serialize(new FileStream(path, FileMode.Create), countries.List);
+                ukrPoshtaParser = new UkrPoshtaParser();
+                var parsedList = ukrPoshtaParser.GetShippingRates();
+                
+                shippingRates.List.AddRange(parsedList);
+
+                repo.Save(filePath, parsedList);              
             }
 
-            countries.AddCountriesListContent();
+            shippingRates.AddCountriesListContent();
 
-            mainView.SetCountriesList(countries.CountriesListContent);
+            mainView.SetCountriesList(shippingRates.CountriesListContent);
 
             mainView.IsGetCountriesButtonEnabled = false;
         }
 
         private void OnCountriesListIndexChange(object sender, EventArgs e)
         {
-            mainView.PrintCountryDetails($"Ориентировочная стоимость доставки Укрпочтой по направлению Украина — {countries.List[mainView.CountriesListIndex].Name} составит: " +
-                $"{countries.List[mainView.CountriesListIndex].LessThan10kgParcelRate}$ за единицу отправления + {countries.List[mainView.CountriesListIndex].LessThan10kgByAirPerKiloRate}$ " +
-                $"за каждый кг веса (включая упаковку). Указанные тарифы актуальны для посылок массой менее 10 кг без объявленной ценности. Доставка " +
-                $"осуществляется авиатранспортом (наиболее быстрый способ).");
+            var text = $"Ориентировочная стоимость доставки Укрпочтой по направлению Украина — {shippingRates.List[mainView.CountriesListIndex].Name} составит: " +
+                       $"{shippingRates.List[mainView.CountriesListIndex].LessThan10kgParcelRate}$ за единицу отправления + {shippingRates.List[mainView.CountriesListIndex].LessThan10kgByAirPerKiloRate}$ " +
+                       $"за каждый кг веса (включая упаковку). Указанные тарифы актуальны для посылок массой менее 10 кг без объявленной ценности. Доставка " +
+                       $"осуществляется авиатранспортом (наиболее быстрый способ).";
+
+            mainView.PrintCountryDetails(text);
         }
 
         private void OnCalculateShippingButtonClick(object sender, EventArgs e)
@@ -76,28 +67,28 @@ namespace UkrPochtaParser
 
             if (mainView.IsLessThan10kgChecked)
             {
-                a = countries.List[mainView.CountriesListIndex].LessThan10kgParcelRate;
+                a = shippingRates.List[mainView.CountriesListIndex].LessThan10kgParcelRate;
 
                 if (mainView.IsByAirChecked)
                 {
-                    b = countries.List[mainView.CountriesListIndex].LessThan10kgByAirPerKiloRate;
+                    b = shippingRates.List[mainView.CountriesListIndex].LessThan10kgByAirPerKiloRate;
                 }
                 else
                 {
-                    b = countries.List[mainView.CountriesListIndex].LessThan10kgByLandPerKiloRate;
+                    b = shippingRates.List[mainView.CountriesListIndex].LessThan10kgByLandPerKiloRate;
                 }
             }
             else
             {
-                a = countries.List[mainView.CountriesListIndex].MoreThan10kgParcelRate;
+                a = shippingRates.List[mainView.CountriesListIndex].MoreThan10kgParcelRate;
 
                 if (mainView.IsByAirChecked)
                 {
-                    b = countries.List[mainView.CountriesListIndex].MoreThan10kgByAirPerKiloRate;
+                    b = shippingRates.List[mainView.CountriesListIndex].MoreThan10kgByAirPerKiloRate;
                 }
                 else
                 {
-                    b = countries.List[mainView.CountriesListIndex].MoreThan10kgByLandPerKiloRate;
+                    b = shippingRates.List[mainView.CountriesListIndex].MoreThan10kgByLandPerKiloRate;
                 }
             }
 
