@@ -20,10 +20,6 @@ namespace UkrPochtaInternationShippingCalc
             get => weightInput.Text; 
             set => weightInput.Text = value; 
         }
-        public bool IsLessThan10kgChecked { 
-            get => less10.Checked; 
-            set => less10.Checked = value; 
-        }
         public int CountriesListIndex { 
             get => countriesList.SelectedIndex; 
             set => countriesList.SelectedIndex = value; 
@@ -31,6 +27,16 @@ namespace UkrPochtaInternationShippingCalc
         public bool IsByAirChecked { 
             get => byAir.Checked; 
             set => byAir.Checked = value; 
+        }
+        public bool IsCalculateShippingButtonEnabled 
+        { 
+            get => calculateShippingButton.Enabled; 
+            set => calculateShippingButton.Enabled = value; 
+        }
+        public string StatusBarText
+        { 
+            get => toolStripStatusLabel1.Text; 
+            set => toolStripStatusLabel1.Text = value; 
         }
 
         public MainView()
@@ -78,6 +84,19 @@ namespace UkrPochtaInternationShippingCalc
             }
         }
 
+        event KeyPressEventHandler IMainView.WeightInputKeyPress
+        {
+            add
+            {
+                weightInput.KeyPress += value;
+            }
+
+            remove
+            {
+                weightInput.KeyPress -= value;
+            }
+        }
+
         //private void CalculateShippingButtonClick(object sender, EventArgs e)
         //{
         //}
@@ -100,9 +119,9 @@ namespace UkrPochtaInternationShippingCalc
             shippingCostOutput.Text = cost;
         }
 
-        public void PrintCountryDetails(string details)
+        public void PrintUserMessage(string countryDetails)
         {
-            countryDetails.Text = details;
+            messageBox.Text = countryDetails;
         }
     }
 }

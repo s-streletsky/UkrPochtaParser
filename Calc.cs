@@ -11,7 +11,7 @@ namespace UkrPochtaInternationShippingCalc
         public static double CalculateShippingCost(double perParcel, double perKilo, double weight)
         {
             var x = perKilo * weight + perParcel;
-            return x;
+            return Math.Round(x, 2);
         }
     }
 }

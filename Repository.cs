@@ -16,6 +16,7 @@ namespace UkrPochtaInternationShippingCalc
         {
             this.serializer = new XmlSerializer(typeof(List<Country>));
         }
+
         public void Save(string filePath, List<Country> parsedList)
         {
             using (FileStream fs = new FileStream(filePath, FileMode.Create))
@@ -24,6 +25,23 @@ namespace UkrPochtaInternationShippingCalc
             }
         }
 
+        public bool TryLoad(string filePath)
+        {
+            if (File.Exists(filePath))
+            {
+                try
+                {
+                    Load(filePath);
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        
         public List<Country> Load(string filePath)
         {
             using (FileStream fs = new FileStream(filePath, FileMode.Open))
