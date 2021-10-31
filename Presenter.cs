@@ -20,6 +20,7 @@ namespace UkrPochtaInternationShippingCalc
             this.mainView = i;
             this.shippingRates = new ShippingRates();
             this.repo = new Repository();
+            this.ukrPoshtaParser = new UkrPoshtaParser();
             mainView.GetCountriesButtonClick += OnGetCountriesButtonClick;
             mainView.CalculateShippingButtonClick += OnCalculateShippingButtonClick;
             mainView.CountriesListIndexChanged += OnCountriesListIndexChange;
@@ -30,39 +31,28 @@ namespace UkrPochtaInternationShippingCalc
         {
             var filePath = Path.Combine(AppContext.BaseDirectory, "ShippingRates.xml");
 
-            if (File.Exists(filePath)) //Если файл с тарифами существует,
+            List<Country> list = null;
+
+            if (repo.TryLoad(filePath, out list))
             {
-                bool initialized = repo.TryLoad(filePath); //пробуем загрузить,
+                shippingRates.List.AddRange(list);
 
-                if (initialized) //если получилось,
-                {
-                    List<Country> deserializedList = repo.Load(filePath); //десериализируем его,
-                    shippingRates.List.AddRange(deserializedList); //копируем содержимое в переменную.
-
-                    mainView.IsCalculateShippingButtonEnabled = true;
-                    mainView.StatusBarText = $"Тарифная сетка успешно загружена из файла ShippingRates.xml (создан {File.GetCreationTime(filePath)})";
-                }             
+                mainView.IsCalculateShippingButtonEnabled = true;
+                mainView.StatusBarText = $"Тарифная сетка успешно загружена из файла ShippingRates.xml (создан {File.GetCreationTime(filePath)})";
             }
-            else //Если же файл отсутствует или битый,
+            else if (ukrPoshtaParser.TryGetShippingRates(out list))
             {
-                ukrPoshtaParser = new UkrPoshtaParser();
-                bool parsed = ukrPoshtaParser.TryGetShippingRates(); //пытаемся парсить сайт,
+                shippingRates.List.AddRange(list);
+                repo.Save(filePath, list);
 
-                if (parsed) //если получилось,
-                {
-                    List<Country> parsedList = ukrPoshtaParser.GetShippingRates(); //принимаем список объектов,
-                    shippingRates.List.AddRange(parsedList); //копируем содержимое в переменную,
-                    repo.Save(filePath, parsedList); //сохраняем в файл.
-
-                    mainView.IsCalculateShippingButtonEnabled = true;
-                    mainView.StatusBarText = $"Тарифная сетка успешно получена с сайта Укрпочты и сохранена в файл ShippingRates.xml";
-                }
-                else
-                {
-                    mainView.PrintUserMessage("ОШИБКА! Не удалось загрузить тарифную сетку! Возможные неполадки: " +
-                        "отсутствует соединение с интернетом, сайт Укрпочты недоступен или изменился формат получаемых данных.");
-                    mainView.StatusBarText = $"Ошибка загрузки!";
-                }
+                mainView.IsCalculateShippingButtonEnabled = true;
+                mainView.StatusBarText = $"Тарифная сетка успешно получена с сайта Укрпочты и сохранена в файл ShippingRates.xml";
+            }
+            else
+            {
+                mainView.PrintUserMessage("ОШИБКА! Не удалось загрузить тарифную сетку! " +
+                    "Смотрите текстовый файл с сегодняшней датой в папке /logs.");
+                mainView.StatusBarText = $"Ошибка загрузки данных!";
             }
 
             shippingRates.AddCountriesListContent();

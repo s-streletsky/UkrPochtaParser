@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,10 +12,12 @@ namespace UkrPochtaInternationShippingCalc
     class Repository
     {
         private XmlSerializer serializer;
+        private Logger log;
 
         public Repository()
         {
             this.serializer = new XmlSerializer(typeof(List<Country>));
+            this.log = LogManager.GetCurrentClassLogger();
         }
 
         public void Save(string filePath, List<Country> parsedList)
@@ -25,16 +28,23 @@ namespace UkrPochtaInternationShippingCalc
             }
         }
 
-        public bool TryLoad(string filePath)
+        public bool TryLoad(string filePath, out List<Country> loadedList)
         {
-            if (File.Exists(filePath))
+            loadedList = null;
+
+            if (!File.Exists(filePath))
+            {
+                return false;
+            }
+            else
             {
                 try
                 {
-                    Load(filePath);
+                    loadedList = Load(filePath);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    log.Error(ex.Message);
                     return false;
                 }
             }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using NLog;
 
 namespace UkrPochtaInternationShippingCalc
 {
@@ -12,10 +13,12 @@ namespace UkrPochtaInternationShippingCalc
     {
         private const string URL = "https://www.ukrposhta.ua/ru/taryfy-mizhnarodni-vidpravlennia-posylky";
         private HtmlWeb site;
+        private Logger log;
 
         public UkrPoshtaParser()
         {
             this.site = new HtmlWeb();
+            this.log = LogManager.GetCurrentClassLogger();
         }
 
         public List<Country> GetShippingRates()
@@ -51,37 +54,18 @@ namespace UkrPochtaInternationShippingCalc
             return shippingRates;
         }
 
-        public bool TryGetShippingRates()
+        public bool TryGetShippingRates(out List<Country> parsedList)
         {
-            HtmlNode table;
+            parsedList = null;
 
             try
             {
-                var htmlDoc = site.Load(URL);
-                table = htmlDoc.DocumentNode.SelectSingleNode("//tbody");
+                parsedList = GetShippingRates();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                log.Error(ex.Message);
                 return false;
-            }
-
-            var nodes = table.SelectNodes(".//tr");
-
-            if (table is null || nodes.Count == 0)
-            {
-                return false;
-            }
-            else
-            {               
-                foreach (var node in nodes)
-                {
-                    var nodeProperties = node.SelectNodes(".//td");
-
-                    if (nodeProperties.Count != 8)
-                    {
-                        return false;
-                    }
-                }
             }
 
             return true;
