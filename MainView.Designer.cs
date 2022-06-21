@@ -220,7 +220,7 @@ namespace UkrPochtaInternationShippingCalc
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MinimumSize = new System.Drawing.Size(970, 555);
             this.Name = "MainView";
-            this.Text = "Form1";
+            this.Text = "UkrPochtaParser v1.0";
             this.shippingMethod.ResumeLayout(false);
             this.shippingMethod.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.countriesBindingSource)).EndInit();
